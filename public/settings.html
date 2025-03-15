@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Configurações - Aquaponia</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-fish"></i>
+                <h1>Aquaponia</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/settings.html" class="nav-item active">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h2>Configurações do Sistema</h2>
+            </header>
+
+            <div class="settings-grid">
+                <!-- Sistema -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>
+                            <i class="fas fa-server"></i>
+                            Sistema
+                        </h3>
+                    </div>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="system-name">
+                                <i class="fas fa-tag"></i>
+                                Nome do Sistema
+                            </label>
+                            <input type="text" id="system-name" placeholder="Aquaponia">
+                        </div>
+                        <div class="form-group">
+                            <label for="update-interval">
+                                <i class="fas fa-clock"></i>
+                                Intervalo de Atualização
+                            </label>
+                            <div class="input-with-unit">
+                                <input type="number" id="update-interval" min="1" max="60" value="1">
+                                <span class="unit">minutos</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="data-retention">
+                                <i class="fas fa-database"></i>
+                                Retenção de Dados
+                            </label>
+                            <div class="input-with-unit">
+                                <input type="number" id="data-retention" min="1" max="365" value="30">
+                                <span class="unit">dias</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alertas -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>
+                            <i class="fas fa-bell"></i>
+                            Alertas
+                        </h3>
+                    </div>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-envelope"></i>
+                                Notificações
+                            </label>
+                            <div class="checkbox-group">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="email-alerts" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Alertas por Email</span>
+                                </label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="push-alerts" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Notificações Push</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="alert-email">
+                                <i class="fas fa-at"></i>
+                                Email para Alertas
+                            </label>
+                            <input type="email" id="alert-email" placeholder="seu@email.com">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Limites de Temperatura -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>
+                            <i class="fas fa-thermometer-half"></i>
+                            Limites de Temperatura
+                        </h3>
+                    </div>
+                    <div class="settings-form">
+                        <div class="range-inputs temperature">
+                            <div class="input-group">
+                                <label for="temp-critical-min">Crítico Mínimo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="temp-critical-min" value="18" step="0.5">
+                                    <span class="unit">°C</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="temp-warning-min">Alerta Mínimo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="temp-warning-min" value="20" step="0.5">
+                                    <span class="unit">°C</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="temp-warning-max">Alerta Máximo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="temp-warning-max" value="28" step="0.5">
+                                    <span class="unit">°C</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="temp-critical-max">Crítico Máximo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="temp-critical-max" value="30" step="0.5">
+                                    <span class="unit">°C</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Limites de Nível -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>
+                            <i class="fas fa-water"></i>
+                            Limites de Nível
+                        </h3>
+                    </div>
+                    <div class="settings-form">
+                        <div class="range-inputs level">
+                            <div class="input-group">
+                                <label for="level-critical-min">Crítico Mínimo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="level-critical-min" value="50">
+                                    <span class="unit">%</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="level-warning-min">Alerta Mínimo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="level-warning-min" value="60">
+                                    <span class="unit">%</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="level-warning-max">Alerta Máximo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="level-warning-max" value="85">
+                                    <span class="unit">%</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="level-critical-max">Crítico Máximo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="level-critical-max" value="90">
+                                    <span class="unit">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automação da Bomba -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>
+                            <i class="fas fa-pump-soap"></i>
+                            Automação da Bomba
+                        </h3>
+                    </div>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pump-auto" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Ativar automação</span>
+                            </label>
+                        </div>
+                        <div class="time-inputs">
+                            <div class="input-group">
+                                <label for="pump-on-time">
+                                    <i class="fas fa-sun"></i>
+                                    Ligar às
+                                </label>
+                                <input type="time" id="pump-on-time" value="06:00">
+                            </div>
+                            <div class="input-group">
+                                <label for="pump-off-time">
+                                    <i class="fas fa-moon"></i>
+                                    Desligar às
+                                </label>
+                                <input type="time" id="pump-off-time" value="18:00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automação do Aquecedor -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>
+                            <i class="fas fa-fire"></i>
+                            Automação do Aquecedor
+                        </h3>
+                    </div>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="heater-auto" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Ativar automação</span>
+                            </label>
+                        </div>
+                        <div class="temperature-inputs">
+                            <div class="input-group">
+                                <label for="heater-on-temp">
+                                    <i class="fas fa-thermometer-empty"></i>
+                                    Ligar abaixo de
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="heater-on-temp" value="22" step="0.5">
+                                    <span class="unit">°C</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="heater-off-temp">
+                                    <i class="fas fa-thermometer-full"></i>
+                                    Desligar acima de
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="heater-off-temp" value="24" step="0.5">
+                                    <span class="unit">°C</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="settings-actions">
+                <button id="save-settings" class="btn-power on">
+                    <i class="fas fa-save"></i>
+                    Salvar Configurações
+                </button>
+                <button id="reset-settings" class="btn-power off">
+                    <i class="fas fa-undo"></i>
+                    Restaurar Padrões
+                </button>
+            </div>
+        </main>
+    </div>
+    <script src="settings.js" defer></script>
+</body>
+</html>

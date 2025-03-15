@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Sistema de Monitoramento - Aquaponia</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-fish"></i>
+                <h1>Aquaponia</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-content">
+                    <div class="header-top">
+                        <div class="header-titles">
+                            <h2>Dashboard de Monitoramento</h2>
+                            <p class="project-name">Projeto de automação de um micro sistema aquapônico utilizando NODEMCU</p>
+                            <p class="group-name">DRP04-PJI510-SALA-001GRUPO-012</p>
+                        </div>
+                        <img src="https://univesp.br/sites/527174b7b24a527adc000002/assets/590b74fa9caf4d3c61001001/Univesp_logo_png_rgb.png" alt="Logo UNIVESP" class="univesp-logo">
+                    </div>
+                    <div class="current-datetime">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="current-date"></span>
+                        <i class="fas fa-clock"></i>
+                        <span id="current-time"></span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="equipment-controls">
+                <div class="control-group">
+                    <div class="control-info">
+                        <div class="control-icon system">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="control-status">
+                            <h4>Status do Sistema</h4>
+                            <p class="status" id="system-status">Desligado</p>
+                            <div class="mode">Sistema</div>
+                        </div>
+                    </div>
+                    <div class="control-actions">
+                        <div class="power-buttons">
+                            <button id="toggle-system" class="btn-power on">
+                                <i class="fas fa-power-off"></i>
+                                Ligar Sistema
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-info">
+                        <div class="control-icon pump">
+                            <i class="fas fa-pump-soap"></i>
+                        </div>
+                        <div class="control-status">
+                            <h4>Bomba d'água</h4>
+                            <p class="status" id="pump-status">Desligado</p>
+                            <div class="mode" id="pump-mode">Manual</div>
+                        </div>
+                    </div>
+                    <div class="control-actions">
+                        <div class="mode-switch">
+                            <button id="bomba-manual" class="btn-mode active">Manual</button>
+                            <button id="bomba-auto" class="btn-mode">Auto</button>
+                        </div>
+                        <div class="power-buttons">
+                            <button id="bomba-on" class="btn-power on">
+                                <i class="fas fa-power-off"></i>
+                                Ligar
+                            </button>
+                            <button id="bomba-off" class="btn-power off">
+                                <i class="fas fa-power-off"></i>
+                                Desligar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-info">
+                        <div class="control-icon heater">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="control-status">
+                            <h4>Aquecedor</h4>
+                            <p class="status" id="heater-status">Desligado</p>
+                            <div class="mode" id="heater-mode">Manual</div>
+                        </div>
+                    </div>
+                    <div class="control-actions">
+                        <div class="mode-switch">
+                            <button id="aquecedor-manual" class="btn-mode active">Manual</button>
+                            <button id="aquecedor-auto" class="btn-mode">Auto</button>
+                        </div>
+                        <div class="power-buttons">
+                            <button id="aquecedor-on" class="btn-power on">
+                                <i class="fas fa-power-off"></i>
+                                Ligar
+                            </button>
+                            <button id="aquecedor-off" class="btn-power off">
+                                <i class="fas fa-power-off"></i>
+                                Desligar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="charts-grid">
+                <div class="chart-card large">
+                    <div class="chart-header">
+                        <h3>Variação de Temperatura</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card large">
+                    <div class="chart-header">
+                        <h3>Nível da Água</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="levelChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="analysis-section">
+                <div class="analysis-header">
+                    <h3>Análise de Dados</h3>
+                    <div class="date-filter">
+                        <div class="calendar-input">
+                            <label for="startDate">
+                                <i class="fas fa-calendar"></i>
+                                Data Inicial
+                            </label>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div class="calendar-input">
+                            <label for="endDate">
+                                <i class="fas fa-calendar"></i>
+                                Data Final
+                            </label>
+                            <input type="date" id="endDate">
+                        </div>
+                        <button id="filter-button" class="btn-update">
+                            <i class="fas fa-filter"></i>
+                            Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-grid">
+                    <div class="chart-card large">
+                        <div class="chart-header">
+                            <h3>Histórico de Temperatura</h3>
+                            <div class="chart-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Média</span>
+                                    <span class="stat-value" id="temp-avg">--°C</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Máxima</span>
+                                    <span class="stat-value" id="temp-max">--°C</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Mínima</span>
+                                    <span class="stat-value" id="temp-min">--°C</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tempHistoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card large">
+                        <div class="chart-header">
+                            <h3>Histórico do Nível da Água</h3>
+                            <div class="chart-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Média</span>
+                                    <span class="stat-value" id="level-avg">--%</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Máxima</span>
+                                    <span class="stat-value" id="level-max">--%</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Mínima</span>
+                                    <span class="stat-value" id="level-min">--%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="levelHistoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js" defer></script>
+</body>
+</html>

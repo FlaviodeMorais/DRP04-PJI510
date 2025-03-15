@@ -1,0 +1,10 @@
+{
+  "ignore": [
+    "*.db",
+    "*.db-journal",
+    "*.db-shm",
+    "*.db-wal",
+    "*.lock"
+  ],
+  "ext": "js,mjs,cjs,json"
+}

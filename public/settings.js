@@ -1,0 +1,1 @@
+[Conteúdo completo do settings.js fornecido anteriormente]
