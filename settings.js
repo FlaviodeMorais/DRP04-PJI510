@@ -6,20 +6,51 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
-// Carregar configurações
-async function loadSettings() {
-    try {
-        const response = await fetch('/api/settings');
-        if (!response.ok) throw new Error('Erro ao carregar configurações');
-        
-        const settings = await response.json();
-        applySettings(settings);
-    } catch (error) {
-        console.error('Erro ao carregar configurações:', error);
-        // Usar configurações padrão em caso de erro
-        applyDefaultSettings();
+/**
+ * Carrega as configurações do sistema.
+ * Funciona tanto no GitHub Pages quanto em um ambiente com backend.
+ * 
+ * - Se o site estiver rodando no GitHub Pages, carrega do localStorage.
+ * - Se o site estiver rodando em um servidor backend, busca via API `/api/settings`.
+ * - Se a API falhar, aplica configurações padrão para evitar falhas no sistema.
+ */
+function loadSettings() {
+    const isGitHubPages = window.location.hostname.includes("github.io") || window.location.hostname.includes("githubusercontent.com"); 
+
+    if (isGitHubPages) {
+        // 🟢 GitHub Pages: Carrega configurações do localStorage (pois não há backend disponível)
+        const savedSettings = localStorage.getItem('aquaponia-settings');
+        if (savedSettings) {
+            applySettings(JSON.parse(savedSettings)); // Aplica configurações salvas no navegador
+        } else {
+            applyDefaultSettings(); // Aplica configurações padrão se não houver nada salvo
+        }
+    } else {
+        // 🔵 Ambiente com backend: Busca configurações via API
+        fetch('/api/settings')
+            .then(response => {
+                if (!response.ok) throw new Error(`Erro ${response.status}: ${response.statusText}`); // Verifica erros HTTP
+                return response.json(); // Converte a resposta para JSON
+            })
+            .then(settings => {
+                applySettings(settings); // Aplica as configurações recebidas do backend
+                localStorage.setItem('aquaponia-settings', JSON.stringify(settings)); // Salva no localStorage para acesso offline
+            })
+            .catch(error => {
+                console.warn('⚠️ Backend não disponível. Tentando carregar do localStorage.', error);
+                
+                const savedSettings = localStorage.getItem('aquaponia-settings');
+                if (savedSettings) {
+                    console.log("📦 Carregando configurações salvas no navegador.");
+                    applySettings(JSON.parse(savedSettings));
+                } else {
+                    console.log("⚙️ Aplicando configurações padrão.");
+                    applyDefaultSettings(); // Se a API falhar e não houver nada salvo, usa padrão
+                }
+            });
     }
 }
+
 
 // Aplicar configurações aos campos
 function applySettings(settings) {
@@ -92,39 +123,42 @@ function applyDefaultSettings() {
     applySettings(defaultSettings);
 }
 
-// Configurar event listeners
+// Configurar event listeners corretamente
 function setupEventListeners() {
     // Botão Salvar
-    document.getElementById('save-settings').addEventListener('click', async () => {
-        const settings = collectSettings();
-        try {
-            const response = await fetch('/api/settings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(settings)
-            });
-
-            if (!response.ok) throw new Error('Erro ao salvar configurações');
-            
-            alert('Configurações salvas com sucesso!');
-        } catch (error) {
-            console.error('Erro ao salvar configurações:', error);
-            alert('Erro ao salvar configurações. Por favor, tente novamente.');
-        }
+    document.getElementById('save-settings').addEventListener('click', () => {
+        saveSettings();
     });
 
     // Botão Restaurar Padrões
     document.getElementById('reset-settings').addEventListener('click', () => {
         if (confirm('Deseja restaurar todas as configurações para os valores padrão?')) {
             applyDefaultSettings();
+            saveSettings(); // Salva os valores padrão
         }
     });
+}
+
+// ✅ Função para salvar configurações no localStorage
+function saveSettings() {
+    const settings = collectSettings();
+    try {
+        localStorage.setItem('aquaponia-settings', JSON.stringify(settings)); // Salva no navegador
+        alert('Configurações salvas com sucesso!');
+    } catch (error) {
+        console.error('Erro ao salvar configurações:', error);
+        alert('Erro ao salvar configurações. Por favor, tente novamente.');
+    }
+}
+
+// ✅ Chamar a função de carregar configurações ao iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+    setupEventListeners();
 
     // Validações em tempo real
     setupValidations();
-}
+});
 
 // Coletar configurações dos campos
 function collectSettings() {
