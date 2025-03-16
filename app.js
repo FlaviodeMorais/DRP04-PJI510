@@ -434,51 +434,114 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Atualizar a função loadLatestData para buscar dados a cada 5 segundos
-    async function loadLatestData() {
-        try {
-            const response = await fetch('/api/temperature/latest');
-            if (!response.ok) {
-                throw new Error('Erro ao carregar dados');
-            }
-            const data = await response.json();
-            updateCharts(data, false);
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
+async function loadLatestData() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    try {
+        const response = await fetch('/api/temperature/latest', { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`Erro ${response.status}: ${response.statusText}`);
         }
+
+        const data = await response.json();
+        updateCharts(data, false);
+    } catch (error) {
+        console.error('❌ Erro ao carregar dados:', error);
+        document.getElementById('error-message').textContent = "❌ Erro ao carregar dados. Verifique a conexão!";
+    }
+}
+
+// Função para carregar dados históricos com melhor tratamento de erros
+async function loadData(startDate, endDate) {
+    if (!validateDateRange(startDate, endDate)) return;
+
+    const loadingMessage = document.getElementById('loading-message');
+    loadingMessage.style.display = 'block';
+
+    try {
+        const response = await fetch(`/api/temperature?startDate=${startDate}&endDate=${endDate}`);
+        if (!response.ok) {
+            throw new Error(`Erro ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        updateCharts(data, true);
+    } catch (error) {
+        console.error('❌ Erro ao carregar dados históricos:', error);
+        showError('❌ Falha ao buscar dados históricos. Verifique a conexão.');
+    } finally {
+        loadingMessage.style.display = 'none';
+    }
+}
+
+// Validação do intervalo de datas antes da busca
+function validateDateRange(startDate, endDate) {
+    if (!startDate || !endDate) {
+        showError('❌ Por favor, selecione as datas inicial e final.');
+        return false;
     }
 
-    // Load Data by Date Range
-    async function loadData(startDate, endDate) {
-        try {
-            const response = await fetch(`/api/temperature?startDate=${startDate}&endDate=${endDate}`);
-            if (!response.ok) {
-                throw new Error('Erro ao carregar dados');
-            }
-            const data = await response.json();
-            updateCharts(data, true);
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-            alert('Erro ao carregar dados históricos');
-        }
+    if (new Date(startDate) > new Date(endDate)) {
+        showError('❌ A data inicial não pode ser maior que a final.');
+        return false;
     }
 
-    // Setup Event Listeners
-    function setupEventListeners() {
-        const filterButton = document.getElementById('filter-button');
-        if (filterButton) {
-            filterButton.addEventListener('click', () => {
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
+    return true;
+}
 
-                if (!startDate || !endDate) {
-                    alert('Por favor, selecione as datas inicial e final');
-                    return;
-                }
+// Função para exibir mensagens de erro na interface
+function showError(message) {
+    const errorBox = document.getElementById('error-message');
+    errorBox.textContent = message;
+    errorBox.style.display = 'block';
+}
 
-                loadData(startDate, endDate);
-            });
-        }
+// Setup dos eventos da interface (filtro por data)
+function setupEventListeners() {
+    const filterButton = document.getElementById('filter-button');
+    if (!filterButton) {
+        console.warn("⚠️ Botão de filtro não encontrado no DOM.");
+        return;
     }
+
+    filterButton.addEventListener('click', () => {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        loadData(startDate, endDate);
+    });
+}
+
+// Controle inteligente da atualização automática de dados
+let updateInterval = null;
+
+function startUpdating() {
+    if (!updateInterval) {
+        loadLatestData();
+        updateInterval = setInterval(loadLatestData, 5000);
+    }
+}
+
+function stopUpdating() {
+    clearInterval(updateInterval);
+    updateInterval = null;
+}
+
+// Pausar a atualização quando a aba não estiver visível
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        startUpdating();
+    } else {
+        stopUpdating();
+    }
+});
+
+// Iniciar atualização automática apenas quando necessário
+startUpdating();
+
 
     // Initialize
     function init() {
