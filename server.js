@@ -91,63 +91,70 @@ const THINGSPEAK_WRITE_API_KEY = process.env.THINGSPEAK_WRITE_API_KEY;
 const THINGSPEAK_CHANNEL_ID = process.env.THINGSPEAK_CHANNEL_ID;
 const THINGSPEAK_BASE_URL = 'https://api.thingspeak.com';
 
-// Fetch data from ThingSpeak with timeout and retry
 async function fetchThingSpeakData(retries = 3) {
-    const timeout = 5000; // 5 seconds timeout
-    
+    const timeout = 5000; // Timeout de 5 segundos
+
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            console.log(`Fetching data from ThingSpeak (attempt ${attempt}/${retries})...`);
-            
+            console.log(`📡 Buscando dados do ThingSpeak (tentativa ${attempt}/${retries})...`);
+
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeout);
-            
+
             const response = await fetch(
                 `${THINGSPEAK_BASE_URL}/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json?api_key=${THINGSPEAK_READ_API_KEY}`,
                 { signal: controller.signal }
             );
-            
+
             clearTimeout(timeoutId);
-            
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`Erro HTTP! Código: ${response.status}`);
             }
-            
-            const text = await response.text(); // Get response as text first
-            console.log('Raw ThingSpeak response:', text);
-            
+
+            const text = await response.text(); // Pegamos como texto primeiro
+            console.log('📩 Resposta bruta do ThingSpeak:', text);
+
             let data;
             try {
-                data = JSON.parse(text); // Parse the text to JSON
+                data = JSON.parse(text); // Converte para JSON
             } catch (e) {
-                console.error('Error parsing ThingSpeak response:', e);
-                throw new Error('Invalid JSON response from ThingSpeak');
+                console.error('❌ Erro ao converter JSON:', e);
+                throw new Error('Resposta inválida do ThingSpeak');
             }
-            
+
             if (!data) {
-                console.log('No data available from ThingSpeak');
+                console.log('⚠️ Nenhum dado recebido do ThingSpeak');
                 return getDefaultReading();
             }
 
-            // Parse values with fallbacks
+            console.log(`📊 Dados originais do ThingSpeak:`, data);
+
+            // ** Correção: Normalizar valores antes de salvar **
+            function parseNumber(value) {
+                if (typeof value === 'string') {
+                    return parseFloat(value.replace(",", ".")); // Substitui vírgula por ponto
+                }
+                return parseFloat(value) || 0.0;
+            }
+
             const reading = {
-                temperature: parseFloat(data.field1) || 25.0,
-                level: parseFloat(data.field2) || 75.0,
-                pump_status: parseInt(data.field3) || 0,
-                heater_status: parseInt(data.field4) || 0,
-                timestamp: new Date(data.created_at || new Date())
+                temperature: parseNumber(data.campo1), // Corrigindo temperatura
+                level: parseNumber(data.campo2),      // Corrigindo nível de água
+                pump_status: parseInt(data.campo3) || 0,
+                heater_status: parseInt(data.campo4) || 0,
+                timestamp: new Date(data.criado_em || new Date()) // Timestamp correto
             };
-            
-            console.log('Parsed reading:', reading);
+
+            console.log('✅ Dados formatados antes de salvar:', reading);
             return reading;
-            
+
         } catch (error) {
-            console.error(`Attempt ${attempt} failed:`, error);
+            console.error(`❌ Tentativa ${attempt} falhou:`, error);
             if (attempt === retries) {
-                console.log('All retry attempts failed, returning default reading');
+                console.log('⚠️ Todas as tentativas falharam. Usando valores padrão.');
                 return getDefaultReading();
             }
-            // Wait before retrying (exponential backoff)
             await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
         }
     }
